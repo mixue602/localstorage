@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //window.onload = function() {
+        localStorage.setItem("name", "mimimi");
+        localStorage.setItem("sex", "nv");
+        teststorage();
+
+        localStorage.removeItem("name")
+        teststorage();
+
+        localStorage.clear()
+        teststorage();
+
+        function teststorage() {
+            var name = localStorage.getItem("name");
+            var sex = localStorage.getItem("sex");
+            name = name ? name : "不存在";
+            sex = sex ? sex : "不存在";
+
+            alert("name:" + name + ";sex:" + sex);
+        }
+        //}
+    </script>
+</body>
+
+</html>

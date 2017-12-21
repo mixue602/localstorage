@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- localStorage类在不支持H5的时候使用不了，所以我们将localStorage的四个函数封装一下，使得当浏览器或客户端不兼容localStorage时自动切换到Cookies存储。首先，要写好一个操作cookie的类和函数，将四个函数的名字和参数还有功能和localStorage保持一致。 -->
+    <script>
+        window.cookieStorage = (new(function() { //cookie方法
+            var maxage = 60 * 60 * 24 * 1000;
+            var path = '/';
+
+            var cookie = getCookie();
+
+            function getCookie() {
+                var cookie = {};
+                var all = document.cookie;
+                if (all === "")
+                    return cookie;
+                var list = all.split("; ");
+                for (var i = 0; i < list.length; i++) {
+                    var cookies = list[i];
+                    var p = cookies.indexOf("=");
+                    var name = cookies.substring(0, p);
+                    var value = cookies.substring(p + 1);
+                    value = decodeURIComponent(value);
+                    cookie[name] = value;
+                }
+                return cookie;
+            }
+
+            var keys = [];
+            for (var key in cookie)
+                keys.push(key);
+
+            this.length = keys.length;
+
+            this.key = function(n) {
+                if (n < 0 || n >= keys.length)
+                    return null;
+                return keys[n];
+            };
+
+            this.setItem = function(key, value) {
+                if (!(key in cookie)) {
+                    keys.push(key);
+                    this.length++;
+                }
+
+                cookie[key] = value;
+                var cookies = key + "=" + encodeURIComponent(value);
+                if (maxage)
+                    cookies += "; max-age=" + maxage;
+                if (path)
+                    cookies += "; path=" + path;
+
+                document.cookie = cookies;
+            };
+
+            this.getItem = function(name) {
+                return cookie[name] || null;
+            };
+
+            this.removeItem = function(key) {
+                if (!(key in cookie))
+                    return;
+
+                delete cookie[key];
+
+                for (var i = 0; i < keys.length; i++) {
+                    if (keys[i] === key) {
+                        keys.splice(i, 1);
+                        break;
+                    }
+                }
+                this.length--;
+
+                document.cookie = key + "=; max-age=0";
+            };
+
+            this.clear = function() {
+                for (var i = 0; i < keys.length; i++)
+                    document.cookie = keys[i] + "; max-age=0";
+                cookie = {};
+                keys = [];
+                this.length = 0;
+            };
+        })());
+
+        window.myStorage = (new(function() { //整合本地存储localStroage和cookie
+
+            var storage; //声明一个变量，用于确定使用哪个本地存储函数  
+
+            if (window.localStorage) {
+                storage = localStorage; //当localStorage存在，使用H5方式  
+            } else {
+                storage = cookieStorage; //当localStorage不存在，使用兼容方式  
+            }
+
+            this.setItem = function(key, value) {
+                storage.setItem(key, value);
+            };
+
+            this.getItem = function(name) {
+                return storage.getItem(name);
+            };
+
+            this.removeItem = function(key) {
+                storage.removeItem(key);
+            };
+
+            this.clear = function() {
+                storage.clear();
+            };
+        })());
+
+        //调用  使用myStorage
+        myStorage.setItem("name", "mimimi");
+        myStorage.setItem("sex", "nv");
+        teststorage();
+
+        myStorage.removeItem("name")
+        teststorage();
+
+        myStorage.clear()
+        teststorage();
+
+        function teststorage() {
+            var name = myStorage.getItem("name");
+            var sex = myStorage.getItem("sex");
+            name = name ? name : "不存在";
+            sex = sex ? sex : "不存在";
+
+            alert("name:" + name + ";sex:" + sex);
+        }
+    </script>
+</body>
+
+</html>
